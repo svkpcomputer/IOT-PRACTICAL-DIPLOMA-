@@ -1,0 +1,14 @@
+import time
+import board
+import adafruit_dht
+
+dht = adafruit_dht.DHT11(board.D4)
+
+while True:
+    try:
+        t = dht.temperature
+        h = dht.humidity
+        print(f"Temperature: {t} °C  Humidity: {h} %")
+    except RuntimeError:
+        pass
+    time.sleep(2)
