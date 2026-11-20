@@ -1,0 +1,44 @@
+#include "thingProperties.h"
+#include <DHT.h>
+
+#define DHTPIN  2
+#define DHTTYPE DHT11
+
+DHT dht(DHTPIN, DHTTYPE);
+
+unsigned long lastRead = 0;
+const unsigned long READ_INTERVAL = 2000;  // DHT11 max rate is ~1 Hz
+
+void setup() {
+  Serial.begin(9600);
+  delay(1500);
+
+  dht.begin();
+
+  initProperties();
+  ArduinoCloud.begin(ArduinoIoTPreferredConnection);
+  setDebugMessageLevel(2);
+  ArduinoCloud.printDebugInfo();
+}
+
+void loop() {
+  ArduinoCloud.update();
+
+  if (millis() - lastRead < READ_INTERVAL) return;
+  lastRead = millis();
+
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();   // use readTemperature(true) for °F
+
+  if (isnan(h) || isnan(t)) {
+    Serial.println("DHT11 read failed - check wiring/pull-up");
+    return;
+  }
+
+  temperature = t;
+  humidity = h;
+
+  Serial.print("T: "); Serial.print(t);
+  Serial.print(" C  H: "); Serial.print(h);
+  Serial.println(" %");
+}
